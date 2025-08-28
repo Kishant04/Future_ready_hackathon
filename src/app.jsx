@@ -1,37 +1,25 @@
-import React, { useState, useEffect } from 'react';
-import { Clock, Play, Pause, Square, Rocket, TrendingUp, CheckCircle, FileText, GitBranch, Zap } from 'lucide-react';
+import React, { useState } from 'react';
+import { Rocket, FileText, GitBranch, CheckCircle, TrendingUp, Zap, ClipboardList, BookOpen, FilePlus2, ArrowLeft, Download, ListChecks } from 'lucide-react';
 
-// Mock Data
-const mockData = {
-  projectHealth: [
-    { id: 1, label: 'Build Status', value: 'Passing', status: 'success', icon: '✅' },
-    { id: 2, label: 'Deployment', value: '2 Issues', status: 'warning', icon: '⚠️' },
-    { id: 3, label: 'Security', value: 'Clean', status: 'success', icon: '🛡️' },
-    { id: 4, label: 'Coverage', value: '67%', status: 'error', icon: '📊' }
+// Placeholder data for dashboard and test case generator
+const mockProject = {
+  name: 'Sample Project',
+  bestPractices: 'Follow SOLID principles, use meaningful variable names, write unit tests, and keep functions small.',
+  codeDetector: 'No major code smells detected. 2 warnings found in utils.js.',
+  glossary: [
+    { term: 'Component', definition: 'A reusable piece of UI.' },
+    { term: 'Hook', definition: 'A special function to use React features.' }
   ],
-  tasks: {
-    todo: [],
-    inProgress: [],
-    done: []
-  },
-  recentActivity: [
-    { id: 1, action: 'Generated docs for auth.js', time: '2 mins ago', type: 'docs' },
-    { id: 2, action: 'Created commit message', time: '5 mins ago', type: 'commit' },
-    { id: 3, action: 'Completed pomodoro session', time: '12 mins ago', type: 'timer' },
-    { id: 4, action: 'Updated task status', time: '18 mins ago', type: 'task' }
-  ]
+  onboarding: '1. Clone the repo. 2. Install dependencies. 3. Run `npm run dev`. 4. Read the README for more info.'
 };
+const mockTestCases = [
+  { module: 'Auth', description: 'Should login with valid credentials', priority: 'High' },
+  { module: 'Dashboard', description: 'Should display user data', priority: 'Medium' }
+];
 
 // UI Components
 const Card = ({ children, className = "", hover = true }) => (
-  <div className={`
-    bg-gray-800/70 backdrop-blur-lg border border-gray-700/50 rounded-2xl p-6
-    shadow-xl transition-all duration-300 relative overflow-hidden
-    before:absolute before:top-0 before:left-0 before:right-0 before:h-px 
-    before:bg-gradient-to-r before:from-transparent before:via-blue-400 before:to-transparent before:opacity-50
-    ${hover ? 'hover:-translate-y-1 hover:shadow-2xl hover:shadow-blue-500/20 hover:border-blue-400/30' : ''}
-    ${className}
-  `}>
+  <div className={`bg-gray-800/70 backdrop-blur-lg border border-gray-700/50 rounded-2xl p-6 shadow-xl transition-all duration-300 relative overflow-hidden ${hover ? 'hover:-translate-y-1 hover:shadow-2xl hover:shadow-blue-500/20 hover:border-blue-400/30' : ''} ${className}`}>
     {children}
   </div>
 );
@@ -44,13 +32,11 @@ const Button = ({ children, variant = 'primary', size = 'md', onClick, className
     danger: 'bg-red-500 hover:bg-red-400 text-white shadow-lg hover:shadow-red-500/25',
     secondary: 'bg-gray-700 hover:bg-gray-600 text-gray-100 border border-gray-600 hover:border-blue-400'
   };
-  
   const sizes = {
     sm: 'px-3 py-2 text-sm',
     md: 'px-4 py-2.5 text-sm',
     lg: 'px-6 py-3 text-base'
   };
-
   return (
     <button
       onClick={onClick}
@@ -314,53 +300,192 @@ const BlankPage = () => (
   </div>
 );
 
-// Main App Component
+// Main App Component (Wireframe Navigation)
 function App() {
-  const [activeTab, setActiveTab] = useState('overview');
+  const [page, setPage] = useState('home');
+  const [githubUrl, setGithubUrl] = useState('');
+  const [projectName, setProjectName] = useState('');
+  const [selectedModule, setSelectedModule] = useState('Auth');
+  const [priority, setPriority] = useState('High');
 
-  const renderContent = () => {
-    switch (activeTab) {
-      case 'overview':
-        return (
-          <div>
-            <ProjectHealth />
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              <div className="lg:col-span-2">
-                <KanbanBoard />
-              </div>
-              <div className="space-y-8">
-                <PomodoroTimer />
-                <RecentActivity />
-              </div>
+  // Homepage (UI-1)
+  if (page === 'home') {
+    return (
+      <div className="min-h-screen bg-gray-900 text-gray-100 flex flex-col items-center justify-center px-4">
+        <div className="w-full max-w-lg mx-auto">
+          <Card className="mb-8 text-center">
+            <div className="flex flex-col items-center gap-4">
+              <Rocket className="w-14 h-14 text-blue-400 mb-2" />
+              <h1 className="text-3xl font-bold mb-2">Welcome to DevMate!</h1>
+              <div className="mb-4 text-gray-400">Your AI-powered project assistant for modern development teams.</div>
+              <input
+                type="text"
+                placeholder="Enter your GitHub repository URL..."
+                value={githubUrl}
+                onChange={e => setGithubUrl(e.target.value)}
+                className="w-full px-4 py-3 rounded-lg bg-gray-800 border border-gray-700 text-gray-100 focus:outline-none focus:border-blue-400 mb-4"
+              />
+              <Button
+                variant="primary"
+                size="lg"
+                className="w-full"
+                onClick={() => {
+                  setProjectName(githubUrl.split('/').pop() || 'Project');
+                  setPage('dashboard');
+                }}
+                disabled={!githubUrl.trim()}
+              >
+                <GitBranch className="w-5 h-5" /> Analyze Repository
+              </Button>
+            </div>
+          </Card>
+          <Card className="text-center">
+            <div className="mb-2 text-xl font-semibold text-blue-400">Our Vision</div>
+            <div className="mb-4 text-gray-300">Empowering developers to build, document, and test with AI-driven insights.</div>
+            <div className="mb-2 text-xl font-semibold text-blue-400">Our Mission</div>
+            <div className="text-gray-300">To automate best practices, documentation, and testing for every project.</div>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  // Project Dashboard (UI-2)
+  if (page === 'dashboard') {
+    return (
+      <div className="min-h-screen bg-gray-900 text-gray-100 flex flex-col items-center px-4 py-8">
+        <div className="w-full max-w-6xl mx-auto">
+          {/* Back Button */}
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-3">
+              <Button variant="secondary" size="sm" className="rounded-full px-3 py-2" onClick={() => setPage('home')}>
+                <ArrowLeft className="w-4 h-4" /> Back
+              </Button>
+              <Rocket className="w-10 h-10 text-blue-400 ml-2" />
+              <h1 className="text-2xl font-bold text-gray-100">{projectName}</h1>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="primary" size="md" onClick={() => setPage('test-cases')}>
+                <ListChecks className="w-4 h-4" /> Generate Test Cases
+              </Button>
+              <Button variant="secondary" size="md"><FileText className="w-4 h-4" /> Development Document</Button>
+              <Button variant="secondary" size="md"><BookOpen className="w-4 h-4" /> UAT Document</Button>
+              <Button variant="secondary" size="md"><ClipboardList className="w-4 h-4" /> Read Me Content</Button>
             </div>
           </div>
-        );
-      case 'tasks':
-        return <KanbanBoard />;
-      case 'ai-docs':
-        return <BlankPage />;
-      case 'git-assistant':
-        return <BlankPage />;
-      default:
-        return null;
-    }
-  };
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Left Side */}
+            <div className="md:col-span-2 flex flex-col gap-8">
+              <Card>
+                <div className="flex items-center gap-3 mb-4">
+                  <TrendingUp className="w-5 h-5 text-blue-400" />
+                  <h3 className="text-lg font-semibold text-gray-100">Best Practices & Code Detector</h3>
+                </div>
+                <div className="text-gray-300 mb-2">{mockProject.bestPractices}</div>
+                <div className="text-gray-400 text-sm">{mockProject.codeDetector}</div>
+              </Card>
+              <Card>
+                <div className="flex items-center gap-3 mb-4">
+                  <FileText className="w-5 h-5 text-blue-400" />
+                  <h3 className="text-lg font-semibold text-gray-100">Glossary</h3>
+                </div>
+                <ul className="text-gray-300 space-y-2">
+                  {mockProject.glossary.map((g, i) => (
+                    <li key={i}><span className="font-semibold text-blue-400">{g.term}:</span> {g.definition}</li>
+                  ))}
+                </ul>
+                <div className="flex gap-2 mt-4">
+                  <Button variant="secondary" size="sm"><Download className="w-4 h-4" /> Export .docx</Button>
+                  <Button variant="secondary" size="sm"><Download className="w-4 h-4" /> Export .md</Button>
+                </div>
+              </Card>
+            </div>
+            {/* Right Side */}
+            <div className="flex flex-col gap-8">
+              <Card className="flex-1">
+                <div className="flex items-center gap-3 mb-4">
+                  <BookOpen className="w-5 h-5 text-blue-400" />
+                  <h3 className="text-lg font-semibold text-gray-100">Onboarding Guide</h3>
+                </div>
+                <div className="text-gray-300 mb-2 whitespace-pre-line">{mockProject.onboarding}</div>
+                <div className="flex gap-2 mt-4">
+                  <Button variant="secondary" size="sm"><Download className="w-4 h-4" /> Export .docx</Button>
+                  <Button variant="secondary" size="sm"><Download className="w-4 h-4" /> Export .md</Button>
+                </div>
+              </Card>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
-  return (
-    <div className="min-h-screen bg-gray-900 text-gray-100">
-      {/* Animated Background */}
-      <div className="fixed inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-transparent to-purple-500/5 animate-pulse" />
+  // Test Case Generator (UI-3)
+  if (page === 'test-cases') {
+    return (
+      <div className="min-h-screen bg-gray-900 text-gray-100 flex flex-col items-center px-4 py-8">
+        <div className="w-full max-w-4xl mx-auto">
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-3">
+              <ListChecks className="w-8 h-8 text-blue-400" />
+              <h1 className="text-2xl font-bold text-gray-100">Test Case Generator</h1>
+            </div>
+            <Button variant="secondary" onClick={() => setPage('dashboard')}><ArrowLeft className="w-4 h-4" /> Back</Button>
+          </div>
+          <Card>
+            <div className="flex flex-col md:flex-row md:items-center gap-4 mb-6">
+              <div className="flex-1">
+                <label className="block text-gray-400 mb-1">Select Module</label>
+                <select
+                  className="w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 text-gray-100 focus:outline-none focus:border-blue-400"
+                  value={selectedModule}
+                  onChange={e => setSelectedModule(e.target.value)}
+                >
+                  <option>Auth</option>
+                  <option>Dashboard</option>
+                  <option>API</option>
+                </select>
+              </div>
+              <div className="flex-1">
+                <label className="block text-gray-400 mb-1">Priority</label>
+                <select
+                  className="w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 text-gray-100 focus:outline-none focus:border-blue-400"
+                  value={priority}
+                  onChange={e => setPriority(e.target.value)}
+                >
+                  <option>High</option>
+                  <option>Medium</option>
+                  <option>Low</option>
+                </select>
+              </div>
+            </div>
+            <div className="space-y-4">
+              {mockTestCases.filter(tc => tc.module === selectedModule && tc.priority === priority).length === 0 ? (
+                <div className="text-gray-400 text-center py-8">No test cases found for this selection.</div>
+              ) : (
+                mockTestCases.filter(tc => tc.module === selectedModule && tc.priority === priority).map((tc, i) => (
+                  <div key={i} className="bg-gray-800/50 rounded-lg p-4 flex flex-col gap-2 border border-gray-700">
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold text-blue-400">{tc.module}</span>
+                      <span className="ml-2 px-2 py-0.5 rounded-full text-xs bg-blue-500/20 text-blue-300">{tc.priority}</span>
+                    </div>
+                    <div className="text-gray-200">{tc.description}</div>
+                  </div>
+                ))
+              )}
+            </div>
+            <div className="flex gap-2 mt-6">
+              <Button variant="secondary" size="sm"><Download className="w-4 h-4" /> Export .docx</Button>
+              <Button variant="secondary" size="sm"><Download className="w-4 h-4" /> Export .md</Button>
+            </div>
+          </Card>
+        </div>
       </div>
-      
-      {/* Content */}
-      <div className="relative z-10 max-w-7xl mx-auto px-6 py-8">
-        <Header />
-        <TabNavigation activeTab={activeTab} setActiveTab={setActiveTab} />
-        {renderContent()}
-      </div>
-    </div>
-  );
+    );
+  }
+
+  // fallback
+  return null;
 }
 
 export default App;
