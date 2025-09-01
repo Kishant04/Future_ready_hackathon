@@ -1,0 +1,12 @@
+{
+  "codeFiles": [
+    {
+      "name": "index.js",
+      "content": "console.log('Hello, welcome to devmate!')"
+    },
+    {
+      "name": "App.jsx",
+      "content": "function App() { return <h1>This is ur repo.json</h1> }"
+    }
+  ]
+}
